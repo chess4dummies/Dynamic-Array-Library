@@ -1,4 +1,6 @@
 #include "DynamicArray.h"
+#include "CommonIncludes.h"
+
 /*
     @description:
         Initializes the darray pointed to by p to the requested capacity.
@@ -72,4 +74,52 @@ extern bool darray_set(darray *p, size_t pos, void *item)
         return false;
     memcpy(&p->data[pos * p->item_size], item, p->item_size);
     return true;
+}
+
+
+/*
+    @description:
+        A simple linear search for data 
+		-1 : data not present.
+		pos: The position where your data is present.(first occurance)
+*/
+extern int darray_search(darray *d_array, void *data)
+{
+	size_t i = 0;
+	size_t j = 0;
+	unsigned char* data_backup_ptr = data;
+
+	if (d_array) {
+		for (; i < d_array->capacity; i++) {	
+			if (darray_compare_bytes(&d_array->data[i * d_array->item_size], (unsigned char*)data, d_array->item_size)) {
+				return i;
+			}
+		}		
+	} else {
+		assert (0); // Your pointer is NULL!
+		return -1; // Doesn't come here anyway.
+	}
+	return -1; // Make compiler happy :D
+}
+
+/*
+    @description:
+        A simple linear search for data 
+		-1 : data not present.
+		pos: The position where your data is present.
+*/
+extern int darray_compare_bytes(unsigned char* data1, unsigned char* data2, size_t size)
+{
+	size_t i = 0;
+	
+	if (data1 && data2) { // NULL check 
+		for (; i < size; i++) {
+			if (*data1++ != *data2++)
+				return 0;
+		}
+	} else {
+		assert(0);
+	}
+
+	return 1; // data same
 }
