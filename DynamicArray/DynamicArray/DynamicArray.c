@@ -91,7 +91,7 @@ extern int darray_search(darray *d_array, void *data)
 
 	if (d_array) {
 		for (; i < d_array->capacity; i++) {	
-			if (darray_compare_bytes(&d_array->data[i * d_array->item_size], (unsigned char*)data, d_array->item_size)) {
+			if (memcmp(&d_array->data[i * d_array->item_size], data, d_array->item_size) == 0) {
 				return i;
 			}
 		}		
@@ -102,24 +102,3 @@ extern int darray_search(darray *d_array, void *data)
 	return -1; // Make compiler happy :D
 }
 
-/*
-    @description:
-        A simple linear search for data 
-		-1 : data not present.
-		pos: The position where your data is present.
-*/
-extern int darray_compare_bytes(unsigned char* data1, unsigned char* data2, size_t size)
-{
-	size_t i = 0;
-	
-	if (data1 && data2) { // NULL check 
-		for (; i < size; i++) {
-			if (*data1++ != *data2++)
-				return 0;
-		}
-	} else {
-		assert(0);
-	}
-
-	return 1; // data same
-}

@@ -47,7 +47,5 @@ extern bool  darray_set(darray *p, size_t pos, void *item);
 /* A simple linear search for data */
 extern int darray_search(darray *d_array, void *data);
 
-/* Compare two byte streams */
-extern int darray_compare_bytes(unsigned char* data1, unsigned char* data2, size_t size);
 
 #endif /* DARRAY_H */
