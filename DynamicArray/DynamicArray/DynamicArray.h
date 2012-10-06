@@ -46,6 +46,8 @@ extern bool  darray_set(darray *p, size_t pos, void *item);
 
 /* A simple linear search for data */
 extern int darray_search(darray *d_array, void *data);
+extern bool darray_sort(darray *p, int (*cmp)(const void*, const void*));
+extern bool darray_swap(darray *p, size_t pos1, size_t pos2);
 
 
 #endif /* DARRAY_H */

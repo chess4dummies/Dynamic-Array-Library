@@ -102,3 +102,106 @@ extern int darray_search(darray *d_array, void *data)
 	return -1; // Make compiler happy :D
 }
 
+
+
+
+static bool do_heap(darray *p, size_t i, size_t n, int (*cmp)(const void*, const void*));
+/*
+    @description:
+        Swaps two elements in the darray pointed to by p. If the
+        swap could not be completed, false is returned. Otherwise
+        true is returned.
+*/
+extern bool darray_swap(darray *p, size_t pos1, size_t pos2)
+{
+    if (pos1 >= p->capacity || pos2 >= p->capacity)
+        return false; /* Out of range index */
+    else {
+#if __STDC_VERSION__ >= 199901L
+        /*
+            VLAs can be risky due to the runtime size not under programmer
+            control. So if the size is greater than a threshold, use
+            dynamic allocation. That should rarely happen here, if ever, 
+            because the item_size is assumed to be the number of bytes 
+            in an object.
+        */
+#define VLA_LIMIT 1024
+        unsigned char temp_base[p->item_size < VLA_LIMIT ? p->item_size : 1];
+        bool dynamic_temp = false;
+        void *temp = temp_base;
+        if (p->item_size >= VLA_LIMIT) {
+            temp = malloc(p->item_size);
+            dynamic_temp = true;
+        }
+#undef VLA_LIMIT
+#else /* __STDC_VERSION__ */
+        /*
+            Prior to C99 we can't take advantage of a stack-based
+            array with a runtime size. At least we can't without using
+            something nonportable like alloca(). To keep the library
+            portable, malloc() is used, despite slowness.
+        */
+        void *temp = malloc(p->item_size);
+        bool dynamic_temp = false;
+#endif /* __STDC_VERSION__ */
+        void *q = &p->data[pos1 * p->item_size];
+        void *r = &p->data[pos2 * p->item_size];
+        if (!temp)
+            return false; /* Failed dynamic allocation */
+        memcpy(temp, q, p->item_size);
+        memcpy(q, r, p->item_size);
+        memcpy(r, temp, p->item_size);
+        if (dynamic_temp)
+            free(temp);
+        return true;
+    }
+}
+/*
+    @description:
+        Sorts the darray pointed to by p according to the comparison
+        rules specified within the function pointed to by cmp. If
+        the sort could not be completed, false is returned. Otherwise,
+        true is returned.
+*/
+extern bool darray_sort(darray *p, int (*cmp)(const void*, const void*))
+{
+    size_t n = p->capacity;
+    size_t i = n / 2;
+    /* Make the entire array a valid heap */
+    while (i-- > 0) {
+        if (!do_heap(p, i, n, cmp))
+            return false;
+    }
+    while (--n < (size_t)-1) {
+        /* Place the maximum value and fix the heap for remaining elements */
+        if (!darray_swap(p, 0, n) || !do_heap(p, 0, n, cmp))
+            return false;
+    }
+    return true;
+}
+/*
+    @description:
+        Heapify helper for darray_sort.
+*/
+static bool do_heap(darray *p, size_t i, size_t n, int (*cmp)(const void*, const void*))
+{
+    void *temp = malloc(p->item_size);
+    unsigned char *base = p->data;
+    size_t size = p->item_size;
+    size_t k;
+    if (!temp)
+        return false; /* Failed dynamic allocation */
+    memcpy(temp, &base[i * size], size);
+    for (k = i * 2 + 1; k < n; k = i * 2 + 1) {
+        if (k + 1 < n && cmp(&base[k * size], &base[(k + 1) * size]) < 0)
+            ++k;
+        if (cmp(temp, &base[k * size]) >= 0)
+            break;
+        memcpy(&base[i * size], &base[k * size], size);
+        i = k;
+    }
+    memcpy(&base[i * size], temp, size);
+    free(temp);
+    return true;
+}
+
