@@ -231,9 +231,7 @@ extern bool darray_insertion_sort(darray *d_array, int (*cmp)(const void*, const
 
 /*
     @description:
-        This function gets you a hash for your data. 
-		Current hashing algorithm: None!
-		Maybe we could have another parameter indicating which hashing algo needs to be used as well.
+        This function copies all occurances of some data into a separate byte stream.
 */
 extern void darray_find_all_occurances(darray *d_array, void* data, unsigned char** all_occurances)
 {    
