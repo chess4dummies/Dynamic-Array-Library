@@ -205,3 +205,85 @@ static bool do_heap(darray *p, size_t i, size_t n, int (*cmp)(const void*, const
     return true;
 }
 
+
+/*
+    @description:
+        A simple insertion sort.
+*/
+extern bool darray_insertion_sort(darray *d_array, int (*cmp)(const void*, const void*))
+{    
+    size_t i, j;
+	unsigned char *temp; 
+    
+	for (i = 1; i < d_array->capacity; i++) {
+		temp = &d_array->data[i * d_array->item_size]; // compare data		
+		j = i-1;
+		
+		while (cmp(temp, &d_array->data[j * d_array->item_size]) && j>=0) {
+			darray_swap(d_array, j+1, j);			
+			j--;
+		}	
+		memcpy(&d_array->data[(j+1) * d_array->item_size], &d_array->data[j * d_array->item_size], d_array->item_size);		
+	}
+
+    return true;
+}
+
+/*
+    @description:
+        This function gets you a hash for your data. 
+		Current hashing algorithm: None!
+		Maybe we could have another parameter indicating which hashing algo needs to be used as well.
+*/
+extern void darray_find_all_occurances(darray *d_array, void* data, unsigned char** all_occurances)
+{    
+    size_t i, count = 0;	
+
+	if (d_array) {
+		for (i = 0; i < d_array->capacity; i++) {
+			if (memcmp(&d_array->data[i * d_array->item_size], data, d_array->item_size) == 0) {
+				count++;
+			}
+		}    
+		
+		if (count == 0) {
+			*all_occurances = NULL;
+			return;
+		}
+
+		*all_occurances = (unsigned char*)calloc(count, d_array->item_size);
+
+		for (i = 0; i < d_array->capacity; i++) {
+			if (memcmp(&d_array->data[i * d_array->item_size], data, d_array->item_size) == 0) {
+				memcpy(*all_occurances, &d_array->data[i * d_array->item_size], d_array->item_size);				
+				*all_occurances += d_array->item_size;				
+			}
+		}   
+
+		*all_occurances -= count * d_array->item_size;
+	} else {
+		assert(0);
+	}
+}
+
+
+/*
+    @description:
+        This function gets you a hash for your data. 
+		Current hashing algorithm: None!
+		Maybe we could have another parameter indicating which hashing algo needs to be used as well.
+*/
+extern void darray_get_hash(darray *d_array, unsigned char** hash)
+{    
+    size_t i;	
+    
+	*hash = d_array->data;
+
+	if (d_array) {
+		for (i = 0; i < d_array->capacity; i++) {
+			// TODO: Use a hashing algo to get hash.
+		}    
+	} else {
+		assert(0);
+	}
+}
